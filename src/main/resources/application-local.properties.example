@@ -1,3 +1,4 @@
 spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
 spring.datasource.username=myuser
 spring.datasource.password=changeme
+jwt.secret=changeme-base64-encoded-256-bit-secret
