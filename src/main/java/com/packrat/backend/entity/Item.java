@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,6 +33,7 @@ public class Item {
     @ManyToOne @JoinColumn(name = "collection_id")
     private Collection collection;
     private String name;
+    @Column(nullable = false)
     private BigDecimal pricePaid;
     @Nullable  
     private BigDecimal priceNow; 
