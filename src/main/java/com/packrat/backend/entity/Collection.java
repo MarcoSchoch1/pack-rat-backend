@@ -23,6 +23,4 @@ public class Collection {
     @ManyToOne @JoinColumn(name = "user_id")
     private User user;
     private String name;
-    private BigDecimal totalPricePaid;
-    private BigDecimal totalPriceNow;
 }

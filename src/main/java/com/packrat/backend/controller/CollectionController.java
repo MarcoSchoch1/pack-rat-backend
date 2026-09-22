@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +18,7 @@ import com.packrat.backend.dto.CollectionResponse;
 import com.packrat.backend.service.CollectionService;
 
 @RestController
-@RequestMapping(name = "api/collection")
+@RequestMapping("api/collections")
 public class CollectionController {
 
     private CollectionService collectionService;
@@ -26,12 +28,22 @@ public class CollectionController {
     }
     
     @GetMapping 
-    public ResponseEntity<List<CollectionResponse>> getCollections(@RequestBody UUID userid) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollectionByUserId(userid));
+    public ResponseEntity<List<CollectionResponse>> getCollections(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollectionByUserId(UUID.fromString(userId)));
     }
 
-    @PostMapping 
-    public ResponseEntity<CollectionResponse> createCollection(@RequestBody CollectionRequest collectionRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.addCollection(collectionRequest));
+    @PostMapping
+    public ResponseEntity<CollectionResponse> createCollection(@AuthenticationPrincipal String userId, @RequestBody CollectionRequest collectionRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.addCollection(UUID.fromString(userId), collectionRequest));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CollectionResponse> getCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollection(id, UUID.fromString(userId)));
+    }
+
+    @GetMapping("/{id}/overview")
+    public ResponseEntity<CollectionResponse> getCollectionOverview(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionOverview(id, UUID.fromString(userId)));
     }
 }
