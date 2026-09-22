@@ -1,5 +1,6 @@
 package com.packrat.backend.entity;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -22,4 +23,6 @@ public class Collection {
     @ManyToOne @JoinColumn(name = "user_id")
     private User user;
     private String name;
+    private BigDecimal totalPricePaid;
+    private BigDecimal totalPriceNow;
 }
