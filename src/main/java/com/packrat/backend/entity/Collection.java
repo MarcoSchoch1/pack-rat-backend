@@ -1,6 +1,5 @@
 package com.packrat.backend.entity;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;

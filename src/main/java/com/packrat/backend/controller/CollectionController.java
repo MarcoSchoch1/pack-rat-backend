@@ -6,9 +6,11 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,8 +44,20 @@ public class CollectionController {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollection(id, UUID.fromString(userId)));
     }
 
+    @PutMapping ("/{id}")
+    public ResponseEntity<CollectionResponse> updateCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id, @RequestBody CollectionRequest collectionRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.updateCollection(id, UUID.fromString(userId), collectionRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+        collectionService.deleteCollection(id, UUID.fromString(userId));
+        return ResponseEntity.status(HttpStatus.OK).body("Collection was successfuly deleted");
+    }
+
     @GetMapping("/{id}/overview")
     public ResponseEntity<CollectionResponse> getCollectionOverview(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionOverview(id, UUID.fromString(userId)));
     }
+
 }
