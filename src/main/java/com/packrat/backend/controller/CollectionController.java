@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.packrat.backend.dto.CollectionRequest;
 import com.packrat.backend.dto.CollectionResponse;
+import com.packrat.backend.dto.ItemRequest;
+import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.service.CollectionService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/collections")
@@ -31,7 +35,7 @@ public class CollectionController {
     
     @GetMapping 
     public ResponseEntity<List<CollectionResponse>> getCollections(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollectionByUserId(UUID.fromString(userId)));
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionByUserId(UUID.fromString(userId)));
     }
 
     @PostMapping
@@ -41,7 +45,7 @@ public class CollectionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CollectionResponse> getCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.findCollection(id, UUID.fromString(userId)));
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollection(id, UUID.fromString(userId)));
     }
 
     @PutMapping ("/{id}")
@@ -60,4 +64,13 @@ public class CollectionController {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionOverview(id, UUID.fromString(userId)));
     }
 
+    @GetMapping("/{id}/items")
+    public ResponseEntity<List<ItemResponse>> getItemsInCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getItemsOfCollection(id, UUID.fromString(userId)));
+    }
+
+    @PostMapping("/{id}/item")
+    public ResponseEntity<ItemResponse> createItem(@AuthenticationPrincipal String userId, @PathVariable UUID id, @Valid @RequestBody ItemRequest itemRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.addItem(id, UUID.fromString(userId), itemRequest));
+    }
 }
