@@ -34,43 +34,43 @@ public class CollectionController {
     }
     
     @GetMapping 
-    public ResponseEntity<List<CollectionResponse>> getCollections(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<List<CollectionResponse>> getCollections(@AuthenticationPrincipal final String userId) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionByUserId(UUID.fromString(userId)));
     }
 
     @PostMapping
-    public ResponseEntity<CollectionResponse> createCollection(@AuthenticationPrincipal String userId, @RequestBody CollectionRequest collectionRequest) {
+    public ResponseEntity<CollectionResponse> createCollection(@AuthenticationPrincipal final String userId, @RequestBody final CollectionRequest collectionRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.addCollection(UUID.fromString(userId), collectionRequest));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CollectionResponse> getCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+    public ResponseEntity<CollectionResponse> getCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollection(id, UUID.fromString(userId)));
     }
 
     @PutMapping ("/{id}")
-    public ResponseEntity<CollectionResponse> updateCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id, @RequestBody CollectionRequest collectionRequest) {
+    public ResponseEntity<CollectionResponse> updateCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @RequestBody final CollectionRequest collectionRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.updateCollection(id, UUID.fromString(userId), collectionRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+    public ResponseEntity<String> deleteCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
         collectionService.deleteCollection(id, UUID.fromString(userId));
         return ResponseEntity.status(HttpStatus.OK).body("Collection was successfuly deleted");
     }
 
     @GetMapping("/{id}/overview")
-    public ResponseEntity<CollectionResponse> getCollectionOverview(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+    public ResponseEntity<CollectionResponse> getCollectionOverview(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionOverview(id, UUID.fromString(userId)));
     }
 
     @GetMapping("/{id}/items")
-    public ResponseEntity<List<ItemResponse>> getItemsInCollection(@AuthenticationPrincipal String userId, @PathVariable UUID id) {
+    public ResponseEntity<List<ItemResponse>> getItemsInCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getItemsOfCollection(id, UUID.fromString(userId)));
     }
 
     @PostMapping("/{id}/item")
-    public ResponseEntity<ItemResponse> createItem(@AuthenticationPrincipal String userId, @PathVariable UUID id, @Valid @RequestBody ItemRequest itemRequest) {
+    public ResponseEntity<ItemResponse> createItem(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @Valid @RequestBody final ItemRequest itemRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.addItem(id, UUID.fromString(userId), itemRequest));
     }
 }

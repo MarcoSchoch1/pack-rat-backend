@@ -1,9 +1,7 @@
 package com.packrat.backend.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +12,6 @@ import com.packrat.backend.dto.CollectionResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.entity.Collection;
-import com.packrat.backend.entity.Condition;
 import com.packrat.backend.entity.Image;
 import com.packrat.backend.entity.Item;
 import com.packrat.backend.entity.User;
@@ -32,12 +29,14 @@ public class CollectionService {
     private ItemRepository itemRepository;
     private ImageRepository imageRepository;
     private UserRepository userRepository;
+    private ItemService itemService;
 
-    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final ImageRepository imageRepository, final UserRepository userRepository) {
+    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final ImageRepository imageRepository, final UserRepository userRepository, final ItemService itemService) {
         this.collectionRepository = collectionRepository;
         this.itemRepository = itemRepository;
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
+        this.itemService = itemService;
     }
 
     public List<CollectionResponse> getCollectionByUserId(final UUID userId) {
@@ -72,20 +71,8 @@ public class CollectionService {
 
     public ItemResponse addItem(final UUID collectionId, final UUID userId, final ItemRequest itemRequest) {
         final Collection collection = requireOwnedCollection(collectionId, userId);
-        final Item item = createItem(new Item(), collection, itemRequest);
+        final Item item = itemService.fillItem(new Item(), collection, itemRequest);
         return toResponse(itemRepository.save(item));
-    }
-
-    public Item createItem(final Item item, final Collection collection, final ItemRequest itemRequest) {
-        item.setCollection(collection);
-        item.setName(itemRequest.name());
-        item.setPricePaid(itemRequest.pricePaid());
-        item.setPriceNow(itemRequest.priceNow());
-        item.setCurrency(Currency.getInstance(itemRequest.currency()));
-        item.setDateAquired(LocalDate.parse(itemRequest.dateAquired()));
-        item.setCondition(Condition.valueOf(itemRequest.condition().toUpperCase()));
-        item.setMarketPlaceLink(itemRequest.marketPlaceLink());
-        return item;
     }
 
     public CollectionResponse updateCollection(final UUID collectionId, final UUID userId, final CollectionRequest collectionRequest) {
