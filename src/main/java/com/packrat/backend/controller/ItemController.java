@@ -1,5 +1,6 @@
 package com.packrat.backend.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.packrat.backend.dto.ImageResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
+import com.packrat.backend.entity.Image;
 import com.packrat.backend.service.ItemService;
 
 @Controller 
@@ -41,5 +44,10 @@ public class ItemController {
     public ResponseEntity<String> deleteItem(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
         itemService.deleteItem(UUID.fromString(userId), id);
         return ResponseEntity.status(HttpStatus.OK).body("Collection was successfuly deleted");
+    }
+
+    @GetMapping("/{id}/images") 
+    public ResponseEntity<List<ImageResponse>> getImages(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getImages(id, UUID.fromString(userId)));
     }
 }

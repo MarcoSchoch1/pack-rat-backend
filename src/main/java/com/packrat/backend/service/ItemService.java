@@ -1,26 +1,33 @@
 package com.packrat.backend.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.packrat.backend.dto.ImageResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.entity.Collection;
 import com.packrat.backend.entity.Condition;
+import com.packrat.backend.entity.Image;
 import com.packrat.backend.entity.Item;
 import com.packrat.backend.exception.ItemNotFoundException;
+import com.packrat.backend.repository.ImageRepository;
 import com.packrat.backend.repository.ItemRepository;
 
 @Service
 public class ItemService {
 
     final ItemRepository itemRepository;
+    final ImageRepository imageRepository;
 
-    public ItemService(final ItemRepository itemRepository) {
+    public ItemService(final ItemRepository itemRepository, final ImageRepository imageRepository) {
         this.itemRepository = itemRepository;
+        this.imageRepository = imageRepository;
     }
 
     public ItemResponse getItem(final UUID userId, final UUID id) {
@@ -51,6 +58,12 @@ public class ItemService {
         itemRepository.deleteById(item.getId());
     }
 
+    public List<ImageResponse> getImages(final UUID itemId, final UUID userId) {
+        final Item item = fetchItemAndCheckOwnership(userId, userId);
+        List<Image> images = imageRepository.findByItemId(item.getId());
+        return toResponse(images);
+    }
+
     private Item fetchItemAndCheckOwnership(final UUID userId, final UUID id) {
         final Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
         if (!item.getCollection().getUser().getId().equals(userId)) {
@@ -62,5 +75,14 @@ public class ItemService {
     public ItemResponse toResponse(final Item item) {
         return new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
                 item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
+    }
+
+    public List<ImageResponse> toResponse(final List<Image> images) {
+        List<ImageResponse> imageResponses = new ArrayList<>();
+        for (Image image : images) {
+            imageResponses.add(new ImageResponse(image.getId(), image.getItem().getId(), image.getUrl(), image.getOriginalFilename(),
+                image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt()));
+        }
+        return imageResponses;
     }
 }

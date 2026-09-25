@@ -28,6 +28,11 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Item not found", ex.getMessage()));
     }
 
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNotFound(ImageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Image not found", ex.getMessage()));
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("User not found", ex.getMessage()));
