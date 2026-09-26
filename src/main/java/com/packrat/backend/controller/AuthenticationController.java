@@ -1,6 +1,5 @@
 package com.packrat.backend.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,19 +10,21 @@ import com.packrat.backend.dto.LoginRequest;
 import com.packrat.backend.dto.LoginResponse;
 import com.packrat.backend.service.AuthenticationService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth/login")
 public class AuthenticationController {
 
-    private AuthenticationService authService;
+    private final AuthenticationService authService;
 
     public AuthenticationController(final AuthenticationService authService) {
         this.authService = authService;
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(authService.login(loginRequest));
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid final LoginRequest loginRequest) {
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
     
 }

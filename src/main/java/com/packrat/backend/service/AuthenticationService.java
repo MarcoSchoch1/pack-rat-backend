@@ -12,9 +12,9 @@ import com.packrat.backend.repository.UserRepository;
 @Service 
 public class AuthenticationService {
     
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private JwtService jwtService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthenticationService(final UserRepository userRepository, final PasswordEncoder passwordEncoder, final JwtService jwtService) {
         this.userRepository = userRepository;
