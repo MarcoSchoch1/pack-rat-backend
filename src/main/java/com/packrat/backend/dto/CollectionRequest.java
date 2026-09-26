@@ -1,5 +1,8 @@
 package com.packrat.backend.dto;
 
-public record CollectionRequest(String name) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CollectionRequest(@NotBlank @Size(max = 255) String name) {
     
 }

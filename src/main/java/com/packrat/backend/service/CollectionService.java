@@ -1,7 +1,6 @@
 package com.packrat.backend.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.packrat.backend.dto.CollectionRequest;
 import com.packrat.backend.dto.CollectionResponse;
-import com.packrat.backend.dto.ItemRequest;
-import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.entity.Collection;
 import com.packrat.backend.entity.Item;
 import com.packrat.backend.entity.User;
@@ -23,9 +20,9 @@ import com.packrat.backend.repository.UserRepository;
 @Service
 public class CollectionService {
 
-    private CollectionRepository collectionRepository;
-    private ItemRepository itemRepository;
-    private UserRepository userRepository;
+    private final CollectionRepository collectionRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final UserRepository userRepository) {
         this.collectionRepository = collectionRepository;
@@ -66,7 +63,7 @@ public class CollectionService {
     public void deleteCollection(final UUID collectionId, final UUID userId) {
         final Collection collection = requireOwnedCollection(collectionId, userId);
         final List<Item> items = itemRepository.findByCollectionId(collectionId);
-        items.stream().forEach((i) -> itemRepository.delete(i));
+        itemRepository.deleteAll(items);
         collectionRepository.deleteById(collection.getId());
     }
 

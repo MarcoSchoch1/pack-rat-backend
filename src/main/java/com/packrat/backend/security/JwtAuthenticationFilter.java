@@ -1,6 +1,7 @@
 package com.packrat.backend.security;
 
 import java.util.List;
+import java.util.UUID;
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             final String token = header.substring("Bearer ".length());
             final Claims claims = jwtService.parseJwt(token);
-            final String userId = claims.getSubject();
+            final UUID userId = UUID.fromString(claims.getSubject());
             final var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);

@@ -20,8 +20,8 @@ import com.packrat.backend.repository.ItemRepository;
 public class ItemService {
 
 
-    final ItemRepository itemRepository;
-    final CollectionService collectionService;
+    private final ItemRepository itemRepository;
+    private final CollectionService collectionService;
 
     public ItemService(final ItemRepository itemRepository, final CollectionService collectionService) {
         this.itemRepository = itemRepository;

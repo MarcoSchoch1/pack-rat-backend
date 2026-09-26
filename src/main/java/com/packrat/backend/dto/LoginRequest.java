@@ -1,5 +1,8 @@
 package com.packrat.backend.dto;
 
-public record LoginRequest(String username, String password) {
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequest(@NotBlank @Valid String username,  @NotBlank @Valid String password) {
 
 } 

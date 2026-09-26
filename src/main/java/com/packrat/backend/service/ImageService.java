@@ -26,8 +26,8 @@ public class ImageService {
 
     private static final int MAX_IMAGE_EDGE_PX = 500;
 
-    private ImageRepository imageRepository;
-    private ItemService itemService;
+    private final ImageRepository imageRepository;
+    private final ItemService itemService;
     
     public ImageService(final ImageRepository imageRepository, final ItemService itemService) {
         this.imageRepository = imageRepository;
