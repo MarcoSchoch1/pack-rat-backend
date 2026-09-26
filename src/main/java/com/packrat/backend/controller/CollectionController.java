@@ -23,7 +23,6 @@ import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.service.CollectionService;
 import com.packrat.backend.service.ItemService;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 
@@ -41,7 +40,7 @@ public class CollectionController {
     
     @GetMapping 
     public ResponseEntity<List<CollectionResponse>> getCollections(@AuthenticationPrincipal final UUID userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollectionByUserId(userId));
+        return ResponseEntity.ok(collectionService.getCollectionsByUserId(userId));
     }
 
     @PostMapping
@@ -59,7 +58,6 @@ public class CollectionController {
         return ResponseEntity.ok(collectionService.updateCollection(id, userId, collectionRequest));
     }
 
-    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCollection(@AuthenticationPrincipal final UUID userId, @PathVariable final UUID id) {
         collectionService.deleteCollection(id, userId);

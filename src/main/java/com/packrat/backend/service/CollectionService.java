@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.packrat.backend.dto.CollectionRequest;
 import com.packrat.backend.dto.CollectionResponse;
@@ -30,7 +31,7 @@ public class CollectionService {
         this.userRepository = userRepository;
     }
 
-    public List<CollectionResponse> getCollectionByUserId(final UUID userId) {
+    public List<CollectionResponse> getCollectionsByUserId(final UUID userId) {
         return collectionRepository.findCollectionsByUserId(userId).stream().map((collection) -> toResponse(collection, null, null)).toList();
     }
 
@@ -60,6 +61,7 @@ public class CollectionService {
         return toResponse(collectionRepository.save(collection), null, null);
     }
 
+    @Transactional
     public void deleteCollection(final UUID collectionId, final UUID userId) {
         final Collection collection = requireOwnedCollection(collectionId, userId);
         final List<Item> items = itemRepository.findByCollectionId(collectionId);

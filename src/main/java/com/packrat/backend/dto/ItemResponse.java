@@ -11,6 +11,6 @@ import com.packrat.backend.entity.Condition;
 import jakarta.annotation.Nullable;
 
 public record ItemResponse(UUID id, UUID collectionId, String name, BigDecimal pricePaid, @Nullable BigDecimal priceNow, Currency currency,
-        LocalDate dateAquired, Condition condition, String marketPlaceLink, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        LocalDate dateAcquired, Condition condition, String marketPlaceLink, LocalDateTime createdAt, LocalDateTime updatedAt) {
 
 }

@@ -72,7 +72,7 @@ class CollectionServiceTest {
     void getCollectionsReturnsAllOfTheUsersCollections() {
         when(collectionRepository.findCollectionsByUserId(ownerId)).thenReturn(List.of(ownedCollection("Pokemon"), ownedCollection("Lego")));
 
-        assertEquals(2, collectionService.getCollectionByUserId(ownerId).size());
+        assertEquals(2, collectionService.getCollectionsByUserId(ownerId).size());
     }
 
     @Test
@@ -168,16 +168,14 @@ class CollectionServiceTest {
     @Test
     void deleteCollectionDeletesItsItemsBeforeTheCollection() {
         final Collection collection = ownedCollection("Pokemon");
-        final Item first = item("10", null);
-        final Item second = item("20", null);
+        final List<Item> items = List.of(item("10", null), item("20", null));
         when(collectionRepository.findById(collection.getId())).thenReturn(Optional.of(collection));
-        when(itemRepository.findByCollectionId(collection.getId())).thenReturn(List.of(first, second));
+        when(itemRepository.findByCollectionId(collection.getId())).thenReturn(items);
 
         collectionService.deleteCollection(collection.getId(), ownerId);
 
         final InOrder order = inOrder(itemRepository, collectionRepository);
-        order.verify(itemRepository).delete(first);
-        order.verify(itemRepository).delete(second);
+        order.verify(itemRepository).deleteAll(items);
         order.verify(collectionRepository).deleteById(collection.getId());
     }
 
@@ -187,7 +185,7 @@ class CollectionServiceTest {
         when(collectionRepository.findById(collection.getId())).thenReturn(Optional.of(collection));
 
         assertThrows(CollectionNotFoundException.class, () -> collectionService.deleteCollection(collection.getId(), otherUserId));
-        verify(itemRepository, never()).delete(any());
+        verify(itemRepository, never()).deleteAll(any());
         verify(collectionRepository, never()).deleteById(any());
     }
 }

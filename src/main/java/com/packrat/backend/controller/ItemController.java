@@ -58,7 +58,7 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/images")
-    public ResponseEntity<ImageResponse> createImage(@AuthenticationPrincipal final UUID userId, @PathVariable final UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ImageResponse> createImage(@AuthenticationPrincipal final UUID userId, @PathVariable final UUID id, @RequestParam("file") final MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED).body(imageService.createImage(id, userId, file));
     }
 }

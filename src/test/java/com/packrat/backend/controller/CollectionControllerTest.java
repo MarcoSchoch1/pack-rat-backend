@@ -108,7 +108,8 @@ class CollectionControllerTest {
         when(collectionService.getCollection(collectionId, userId)).thenThrow(new CollectionNotFoundException(collectionId));
 
         mockMvc.perform(authenticated(get("/api/collections/" + collectionId)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Collection " + collectionId + " not found"));
     }
 
     @Test

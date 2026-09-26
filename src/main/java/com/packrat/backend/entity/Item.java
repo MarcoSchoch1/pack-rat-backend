@@ -38,7 +38,7 @@ public class Item {
     @Nullable  
     private BigDecimal priceNow; 
     private Currency currency;
-    private LocalDate dateAquired;
+    private LocalDate dateAcquired;
     @Enumerated(EnumType.STRING)
     private Condition condition;
     private String marketPlaceLink;

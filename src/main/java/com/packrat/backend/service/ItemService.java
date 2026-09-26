@@ -64,8 +64,8 @@ public class ItemService {
         if (itemRequest.currency() != null) {
             item.setCurrency(Currency.getInstance(itemRequest.currency()));
         }
-        if (itemRequest.dateAquired() != null) {
-            item.setDateAquired(LocalDate.parse(itemRequest.dateAquired()));
+        if (itemRequest.dateAcquired() != null) {
+            item.setDateAcquired(LocalDate.parse(itemRequest.dateAcquired()));
         }
         if (itemRequest.condition() != null) {
             item.setCondition(Condition.valueOf(itemRequest.condition().toUpperCase()));
@@ -91,14 +91,14 @@ public class ItemService {
 
     public ItemResponse toResponse(final Item item) {
         return new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
-                item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
+                item.getCurrency(), item.getDateAcquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
     }
 
     public List<ItemResponse> toResponse(final List<Item> items) {
         List<ItemResponse> itemResponses = new ArrayList<>();
         for (Item item : items) {
             itemResponses.add(new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
-                item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt()));
+                item.getCurrency(), item.getDateAcquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt()));
         }
         return itemResponses;
     }

@@ -42,7 +42,7 @@ public class ImageService {
         final Item item = itemService.fetchItemAndCheckOwnership(userId, itemId);
         final byte[] resizedImageBytes = resizeImage(file);
         final Image savedImage = fillImage(new Image(), item, file, resizedImageBytes);
-        return toResponse(savedImage, resizedImageBytes);
+        return toResponse(savedImage);
     }
 
     public void deleteImage(final UUID imageId, final UUID userId) {
@@ -111,7 +111,7 @@ public class ImageService {
         return image;
     }
 
-    public ImageResponse toResponse(final Image image, final byte[] resizedImageBytes) {
+    public ImageResponse toResponse(final Image image) {
         return new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(), image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt());
     }
 

@@ -13,8 +13,8 @@ import com.packrat.backend.repository.UserRepository;
 @Component @Profile("local")
 public class DevDataInitializer implements CommandLineRunner {
 
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DevDataInitializer(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;

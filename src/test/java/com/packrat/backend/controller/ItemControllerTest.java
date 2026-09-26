@@ -89,7 +89,8 @@ class ItemControllerTest {
         when(itemService.getItem(userId, itemId)).thenThrow(new ItemNotFoundException(itemId));
 
         mockMvc.perform(authenticated(get("/api/items/" + itemId)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Item " + itemId + " not found"));
     }
 
     @Test

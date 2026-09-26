@@ -13,29 +13,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice 
 public class ApiExceptionHandler {
 
+    // every error body has the same shape: {"error": "<message>"}
+
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(BadCredentialsException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Bad Credentials", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(CollectionNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(CollectionNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Collection not found", ex.getMessage()));
-    }
-
-    @ExceptionHandler(ItemNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(ItemNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Item not found", ex.getMessage()));
-    }
-
-    @ExceptionHandler(ImageNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(ImageNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Image not found", ex.getMessage()));
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(UserNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("User not found", ex.getMessage()));
+    @ExceptionHandler({CollectionNotFoundException.class, ItemNotFoundException.class, ImageNotFoundException.class, UserNotFoundException.class})
+    public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
