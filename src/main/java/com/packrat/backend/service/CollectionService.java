@@ -26,17 +26,15 @@ public class CollectionService {
     private CollectionRepository collectionRepository;
     private ItemRepository itemRepository;
     private UserRepository userRepository;
-    private ItemService itemService;
 
-    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final UserRepository userRepository, final ItemService itemService) {
+    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final UserRepository userRepository) {
         this.collectionRepository = collectionRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
-        this.itemService = itemService;
     }
 
     public List<CollectionResponse> getCollectionByUserId(final UUID userId) {
-        return collectionRepository.findCollectionByUserId(userId).stream().map((collection) -> toResponse(collection, null, null)).toList();
+        return collectionRepository.findCollectionsByUserId(userId).stream().map((collection) -> toResponse(collection, null, null)).toList();
     }
 
     public CollectionResponse getCollection(final UUID collectionId, final UUID userId) {
@@ -51,24 +49,12 @@ public class CollectionService {
         return toResponse(collection, totalPricePaid, totalPriceNow);
     }
 
-    public List<ItemResponse> getItemsOfCollection(final UUID collectionId, final UUID userId) {
-        final Collection collection = requireOwnedCollection(collectionId, userId);
-        final List<Item> items = itemRepository.findByCollectionId(collection.getId());
-        return toResponse(items);
-    }
-
     public CollectionResponse addCollection(final UUID userId, final CollectionRequest collectionRequest) {
         final User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         final Collection collection = new Collection();
         collection.setUser(user);
         collection.setName(collectionRequest.name());
         return toResponse(collectionRepository.save(collection), null, null);
-    }
-
-    public ItemResponse addItem(final UUID collectionId, final UUID userId, final ItemRequest itemRequest) {
-        final Collection collection = requireOwnedCollection(collectionId, userId);
-        final Item item = itemService.fillItem(new Item(), collection, itemRequest);
-        return toResponse(itemRepository.save(item));
     }
 
     public CollectionResponse updateCollection(final UUID collectionId, final UUID userId, final CollectionRequest collectionRequest) {
@@ -84,7 +70,7 @@ public class CollectionService {
         collectionRepository.deleteById(collection.getId());
     }
 
-    private Collection requireOwnedCollection(final UUID collectionId, final UUID userId) {
+    protected Collection requireOwnedCollection(final UUID collectionId, final UUID userId) {
         final Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new CollectionNotFoundException(collectionId));
         if (!collection.getUser().getId().equals(userId)) {
             throw new CollectionNotFoundException(collectionId);
@@ -96,17 +82,4 @@ public class CollectionService {
         return new CollectionResponse(collection.getId(), collection.getUser().getId(), collection.getName(), totalPricePaid, totalPriceNow);
     }
 
-    public ItemResponse toResponse(final Item item) {
-        return new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
-                item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
-    }
-
-    public List<ItemResponse> toResponse(final List<Item> items) {
-        List<ItemResponse> itemResponses = new ArrayList<>();
-        for (Item item : items) {
-            itemResponses.add(new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
-                item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt()));
-        }
-        return itemResponses;
-    }
 }

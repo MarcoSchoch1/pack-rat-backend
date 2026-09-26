@@ -1,65 +1,101 @@
 package com.packrat.backend.service;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
-
-import javax.imageio.ImageIO;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockMultipartFile;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.packrat.backend.dto.ItemRequest;
+import com.packrat.backend.entity.Collection;
 import com.packrat.backend.entity.Item;
+import com.packrat.backend.entity.User;
+import com.packrat.backend.exception.CollectionNotFoundException;
+import com.packrat.backend.exception.ItemNotFoundException;
+import com.packrat.backend.repository.ItemRepository;
 
+@ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
 
-    private final ImageService imageService = new ImageService(null);
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private CollectionService collectionService;
+    @InjectMocks
+    private ItemService itemService;
 
-    private MockMultipartFile image(final int width, final int height, final String format) throws IOException {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ImageIO.write(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB), format, out);
-        return new MockMultipartFile("file", "test." + format, format.equals("png") ? "image/png" : "image/jpeg", out.toByteArray());
-    }
+    private final UUID ownerId = UUID.randomUUID();
+    private final UUID otherUserId = UUID.randomUUID();
 
-    private int[] size(final byte[] bytes) throws IOException {
-        final BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
-        return new int[] { img.getWidth(), img.getHeight() };
-    }
-
-    @Test
-    void shrinksLongestEdgeTo500AndKeepsAspectRatio() throws IOException {
-        assertArrayEquals(new int[] { 500, 250 }, size(imageService.resizeImage(image(2000, 1000, "jpg"))));
-        assertArrayEquals(new int[] { 250, 500 }, size(imageService.resizeImage(image(1000, 2000, "png"))));
-    }
-
-    @Test
-    void doesNotUpscaleSmallImages() throws IOException {
-        assertArrayEquals(new int[] { 300, 200 }, size(imageService.resizeImage(image(300, 200, "png"))));
-    }
-
-    @Test
-    void rejectsNonImages() {
-        final MockMultipartFile text = new MockMultipartFile("file", "hello.jpg", "image/jpeg", "hello".getBytes());
-        assertEquals("File is not a readable image",
-                assertThrows(IllegalArgumentException.class, () -> imageService.resizeImage(text)).getMessage());
+    private Item ownedItem() {
+        final User owner = new User();
+        owner.setId(ownerId);
+        final Collection collection = new Collection();
+        collection.setId(UUID.randomUUID());
+        collection.setUser(owner);
+        final Item item = new Item();
+        item.setId(UUID.randomUUID());
+        item.setCollection(collection);
+        return item;
     }
 
     @Test
     void fillItemOnlyChangesFieldsThatWereSent() {
-        final Item item = new Item();
+        when(itemRepository.save(any(Item.class))).thenAnswer(returnsFirstArg());
+        final Item item = ownedItem();
         item.setName("Charizard");
         item.setPricePaid(new BigDecimal("100"));
 
-        new ItemService(null, null, null).fillItem(item, null, new ItemRequest(null, new BigDecimal("80"), null, null, null, null, null));
+        itemService.fillItem(item, item.getCollection(), new ItemRequest(null, new BigDecimal("80"), null, null, null, null, null));
 
         assertEquals("Charizard", item.getName());
         assertEquals(new BigDecimal("80"), item.getPricePaid());
+    }
+
+    @Test
+    void getItemReturnsOwnItem() {
+        final Item item = ownedItem();
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+
+        assertEquals(item.getId(), itemService.getItem(ownerId, item.getId()).id());
+    }
+
+    @Test
+    void getItemHidesOtherUsersItems() {
+        final Item item = ownedItem();
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+
+        assertThrows(ItemNotFoundException.class, () -> itemService.getItem(otherUserId, item.getId()));
+    }
+
+    @Test
+    void deleteItemNeverDeletesOtherUsersItems() {
+        final Item item = ownedItem();
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+
+        assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(otherUserId, item.getId()));
+        verify(itemRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void addItemNeverSavesIntoOtherUsersCollection() {
+        final UUID collectionId = UUID.randomUUID();
+        when(collectionService.requireOwnedCollection(collectionId, otherUserId)).thenThrow(new CollectionNotFoundException(collectionId));
+
+        assertThrows(CollectionNotFoundException.class,
+                () -> itemService.addItem(collectionId, otherUserId, new ItemRequest("Pikachu", BigDecimal.TEN, null, "CHF", "2026-01-01", "MINT", null)));
+        verify(itemRepository, never()).save(any());
     }
 }

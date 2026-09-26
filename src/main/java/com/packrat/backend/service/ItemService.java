@@ -7,17 +7,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.packrat.backend.dto.ImageResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.entity.Collection;
 import com.packrat.backend.entity.Condition;
-import com.packrat.backend.entity.Image;
 import com.packrat.backend.entity.Item;
 import com.packrat.backend.exception.ItemNotFoundException;
-import com.packrat.backend.repository.ImageRepository;
 import com.packrat.backend.repository.ItemRepository;
 
 @Service
@@ -25,13 +21,11 @@ public class ItemService {
 
 
     final ItemRepository itemRepository;
-    final ImageRepository imageRepository;
-    final ImageService imageService;
+    final CollectionService collectionService;
 
-    public ItemService(final ItemRepository itemRepository, final ImageRepository imageRepository, final ImageService imageService) {
+    public ItemService(final ItemRepository itemRepository, final CollectionService collectionService) {
         this.itemRepository = itemRepository;
-        this.imageRepository = imageRepository;
-        this.imageService = imageService;
+        this.collectionService = collectionService;
     }
 
     public ItemResponse getItem(final UUID userId, final UUID id) {
@@ -41,8 +35,18 @@ public class ItemService {
 
     public ItemResponse updateItem(final UUID userId, final UUID id, final ItemRequest itemRequest) {
         final Item item = fetchItemAndCheckOwnership(userId, id);
-        fillItem(item, item.getCollection(), itemRequest);
-        return toResponse(itemRepository.save(item));
+        return toResponse(fillItem(item, item.getCollection(), itemRequest));
+    }
+
+    public ItemResponse addItem(final UUID collectionId, final UUID userId, final ItemRequest itemRequest) {
+        final Collection collection = collectionService.requireOwnedCollection(collectionId, userId);
+        return toResponse(fillItem(new Item(), collection, itemRequest));
+    }
+
+    public List<ItemResponse> getItemsOfCollection(final UUID collectionId, final UUID userId) {
+        final Collection collection = collectionService.requireOwnedCollection(collectionId, userId);
+        final List<Item> items = itemRepository.findByCollectionId(collection.getId());
+        return toResponse(items);
     }
 
     public Item fillItem(final Item item, final Collection collection, final ItemRequest itemRequest) {
@@ -69,7 +73,7 @@ public class ItemService {
         if (itemRequest.marketPlaceLink() != null) {
             item.setMarketPlaceLink(itemRequest.marketPlaceLink());
         }
-        return item;
+        return itemRepository.save(item);
     }
 
     public void deleteItem(final UUID userId, final UUID id) {
@@ -77,20 +81,7 @@ public class ItemService {
         itemRepository.deleteById(item.getId());
     }
 
-    public List<ImageResponse> getImages(final UUID itemId, final UUID userId) {
-        final Item item = fetchItemAndCheckOwnership(userId, itemId);
-        List<Image> images = imageRepository.findByItemId(item.getId());
-        return toResponse(images);
-    }
-
-    public ImageResponse createImage(final UUID itemId, final UUID userId, final MultipartFile file) {
-        final Item item = fetchItemAndCheckOwnership(userId, itemId);
-        final byte[] resizedImageBytes = imageService.resizeImage(file);
-        final Image savedImage = imageService.fillImage(new Image(), item, file, resizedImageBytes);
-        return imageService.toResponse(savedImage, resizedImageBytes);
-    }
-
-    private Item fetchItemAndCheckOwnership(final UUID userId, final UUID id) {
+    protected Item fetchItemAndCheckOwnership(final UUID userId, final UUID id) {
         final Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
         if (!item.getCollection().getUser().getId().equals(userId)) {
             throw new ItemNotFoundException(id);
@@ -103,13 +94,12 @@ public class ItemService {
                 item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
     }
 
-    public List<ImageResponse> toResponse(final List<Image> images) {
-        List<ImageResponse> imageResponses = new ArrayList<>();
-        for (Image image : images) {
-            imageResponses.add(new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(),
-                image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt()));
+    public List<ItemResponse> toResponse(final List<Item> items) {
+        List<ItemResponse> itemResponses = new ArrayList<>();
+        for (Item item : items) {
+            itemResponses.add(new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
+                item.getCurrency(), item.getDateAquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt()));
         }
-        return imageResponses;
+        return itemResponses;
     }
-
 }

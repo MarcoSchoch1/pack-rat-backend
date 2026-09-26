@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.packrat.backend.dto.ImageResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
-import com.packrat.backend.entity.Image;
+import com.packrat.backend.service.ImageService;
 import com.packrat.backend.service.ItemService;
 
 @Controller 
@@ -29,9 +28,11 @@ import com.packrat.backend.service.ItemService;
 public class ItemController {
 
     private ItemService itemService;
+    private ImageService imageService;
     
-    public ItemController(final ItemService itemService) {
+    public ItemController(final ItemService itemService, final ImageService imageService) {
         this.itemService = itemService;
+        this.imageService = imageService;
     }
 
     @GetMapping("/{id}")
@@ -52,11 +53,11 @@ public class ItemController {
 
     @GetMapping("/{id}/images") 
     public ResponseEntity<List<ImageResponse>> getImages(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getImages(id, UUID.fromString(userId)));
+        return ResponseEntity.status(HttpStatus.OK).body(imageService.getImages(id, UUID.fromString(userId)));
     }
 
     @PostMapping("/{id}/image")
     public ResponseEntity<ImageResponse> createImage(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.createImage(id, UUID.fromString(userId), file));
+        return ResponseEntity.status(HttpStatus.CREATED).body(imageService.createImage(id, UUID.fromString(userId), file));
     }
 }

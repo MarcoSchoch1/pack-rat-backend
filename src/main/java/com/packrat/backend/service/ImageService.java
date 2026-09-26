@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -25,9 +27,22 @@ public class ImageService {
     private static final int MAX_IMAGE_EDGE_PX = 500;
 
     private ImageRepository imageRepository;
+    private ItemService itemService;
     
-    public ImageService(final ImageRepository imageRepository) {
+    public ImageService(final ImageRepository imageRepository, final ItemService itemService) {
         this.imageRepository = imageRepository;
+        this.itemService = itemService;
+    }
+
+    public Image getImage(final UUID imageId, final UUID userId) {
+        return fetchImageAndCheckOwnership(userId, imageId);
+    }
+
+    public ImageResponse createImage(final UUID itemId, final UUID userId, final MultipartFile file) {
+        final Item item = itemService.fetchItemAndCheckOwnership(userId, itemId);
+        final byte[] resizedImageBytes = resizeImage(file);
+        final Image savedImage = fillImage(new Image(), item, file, resizedImageBytes);
+        return toResponse(savedImage, resizedImageBytes);
     }
 
     public void deleteImage(final UUID imageId, final UUID userId) {
@@ -35,9 +50,20 @@ public class ImageService {
         imageRepository.delete(image);
     } 
 
+    public List<ImageResponse> getImages(final UUID itemId, final UUID userId) {
+        final Item item = itemService.fetchItemAndCheckOwnership(userId, itemId);
+        List<Image> images = imageRepository.findByItemId(item.getId());
+        return toResponse(images);
+    }
+
     // Scales the image down so its longest edge is at most MAX_IMAGE_EDGE_PX (ADR-015). Never scales up.
     protected byte[] resizeImage(final MultipartFile file) {
-        final String format = "image/png".equals(file.getContentType()) ? "png" : "jpg";
+        // the bytes get re-encoded in this format, so the stored contentType always matches the data
+        final String format = switch (String.valueOf(file.getContentType())) {
+            case "image/png" -> "png";
+            case "image/jpeg" -> "jpg";
+            default -> throw new IllegalArgumentException("Only PNG and JPEG images are supported");
+        };
         try {
             final BufferedImage original = ImageIO.read(file.getInputStream());
             if (original == null) {
@@ -87,5 +113,14 @@ public class ImageService {
 
     public ImageResponse toResponse(final Image image, final byte[] resizedImageBytes) {
         return new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(), image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt());
+    }
+
+    public List<ImageResponse> toResponse(final List<Image> images) {
+        List<ImageResponse> imageResponses = new ArrayList<>();
+        for (Image image : images) {
+            imageResponses.add(new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(),
+                image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt()));
+        }
+        return imageResponses;
     }
 }

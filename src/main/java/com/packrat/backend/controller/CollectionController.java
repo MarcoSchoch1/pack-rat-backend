@@ -21,6 +21,7 @@ import com.packrat.backend.dto.CollectionResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.service.CollectionService;
+import com.packrat.backend.service.ItemService;
 
 import jakarta.validation.Valid;
 
@@ -29,9 +30,11 @@ import jakarta.validation.Valid;
 public class CollectionController {
 
     private CollectionService collectionService;
+    private ItemService itemService;
 
-    public CollectionController(final CollectionService collectionService) {
+    public CollectionController(final CollectionService collectionService, final ItemService itemService) {
         this.collectionService = collectionService;
+        this.itemService = itemService;
     }
     
     @GetMapping 
@@ -67,11 +70,11 @@ public class CollectionController {
 
     @GetMapping("/{id}/items")
     public ResponseEntity<List<ItemResponse>> getItemsInCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getItemsOfCollection(id, UUID.fromString(userId)));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsOfCollection(id, UUID.fromString(userId)));
     }
 
     @PostMapping("/{id}/item")
     public ResponseEntity<ItemResponse> createItem(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @Valid @RequestBody final ItemRequest itemRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(collectionService.addItem(id, UUID.fromString(userId), itemRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.addItem(id, UUID.fromString(userId), itemRequest));
     }
 }
