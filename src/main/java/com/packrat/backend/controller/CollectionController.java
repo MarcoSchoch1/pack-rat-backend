@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,7 +41,7 @@ public class CollectionController {
 
     @PostMapping
     public ResponseEntity<CollectionResponse> createCollection(@AuthenticationPrincipal final String userId, @RequestBody final CollectionRequest collectionRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.addCollection(UUID.fromString(userId), collectionRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(collectionService.addCollection(UUID.fromString(userId), collectionRequest));
     }
 
     @GetMapping("/{id}")
@@ -48,7 +49,7 @@ public class CollectionController {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getCollection(id, UUID.fromString(userId)));
     }
 
-    @PutMapping ("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CollectionResponse> updateCollection(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @RequestBody final CollectionRequest collectionRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.updateCollection(id, UUID.fromString(userId), collectionRequest));
     }
@@ -71,6 +72,6 @@ public class CollectionController {
 
     @PostMapping("/{id}/item")
     public ResponseEntity<ItemResponse> createItem(@AuthenticationPrincipal final String userId, @PathVariable final UUID id, @Valid @RequestBody final ItemRequest itemRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.addItem(id, UUID.fromString(userId), itemRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(collectionService.addItem(id, UUID.fromString(userId), itemRequest));
     }
 }

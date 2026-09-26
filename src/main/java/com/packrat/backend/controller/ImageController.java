@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.packrat.backend.dto.ImageResponse;
 import com.packrat.backend.service.ImageService;
 
 @Controller 

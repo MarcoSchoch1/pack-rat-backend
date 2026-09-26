@@ -12,13 +12,11 @@ import com.packrat.backend.dto.CollectionResponse;
 import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.entity.Collection;
-import com.packrat.backend.entity.Image;
 import com.packrat.backend.entity.Item;
 import com.packrat.backend.entity.User;
 import com.packrat.backend.exception.CollectionNotFoundException;
 import com.packrat.backend.exception.UserNotFoundException;
 import com.packrat.backend.repository.CollectionRepository;
-import com.packrat.backend.repository.ImageRepository;
 import com.packrat.backend.repository.ItemRepository;
 import com.packrat.backend.repository.UserRepository;
 
@@ -27,14 +25,12 @@ public class CollectionService {
 
     private CollectionRepository collectionRepository;
     private ItemRepository itemRepository;
-    private ImageRepository imageRepository;
     private UserRepository userRepository;
     private ItemService itemService;
 
-    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final ImageRepository imageRepository, final UserRepository userRepository, final ItemService itemService) {
+    public CollectionService(final CollectionRepository collectionRepository, final ItemRepository itemRepository, final UserRepository userRepository, final ItemService itemService) {
         this.collectionRepository = collectionRepository;
         this.itemRepository = itemRepository;
-        this.imageRepository = imageRepository;
         this.userRepository = userRepository;
         this.itemService = itemService;
     }
@@ -84,8 +80,6 @@ public class CollectionService {
     public void deleteCollection(final UUID collectionId, final UUID userId) {
         final Collection collection = requireOwnedCollection(collectionId, userId);
         final List<Item> items = itemRepository.findByCollectionId(collectionId);
-        final List<Image> images = imageRepository.findAllById(items.stream().map((i) -> i.getId()).toList());
-        images.stream().forEach((i) -> imageRepository.delete(i));
         items.stream().forEach((i) -> itemRepository.delete(i));
         collectionRepository.deleteById(collection.getId());
     }
@@ -99,7 +93,7 @@ public class CollectionService {
     }
 
     public CollectionResponse toResponse(final Collection collection, final BigDecimal totalPricePaid, final BigDecimal totalPriceNow) {
-        return new CollectionResponse(collection.getId(), collection.getUser(), collection.getName(), totalPricePaid, totalPriceNow);
+        return new CollectionResponse(collection.getId(), collection.getUser().getId(), collection.getName(), totalPricePaid, totalPriceNow);
     }
 
     public ItemResponse toResponse(final Item item) {

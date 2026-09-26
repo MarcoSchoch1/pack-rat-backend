@@ -7,6 +7,6 @@ import com.packrat.backend.entity.User;
 
 import jakarta.annotation.Nullable;
 
-public record CollectionResponse(UUID id, User user, String name, @Nullable BigDecimal totalPricePaid,@Nullable BigDecimal totalPriceNow) {
+public record CollectionResponse(UUID id, UUID userId, String name, @Nullable BigDecimal totalPricePaid,@Nullable BigDecimal totalPriceNow) {
     
 }
