@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +52,7 @@ public class ImageService {
     public List<ImageResponse> getImages(final UUID itemId, final UUID userId) {
         final Item item = itemService.fetchItemAndCheckOwnership(userId, itemId);
         List<Image> images = imageRepository.findByItemId(item.getId());
-        return toResponse(images);
+        return images.stream().map(this::toResponse).toList();
     }
 
     // Scales the image down so its longest edge is at most MAX_IMAGE_EDGE_PX (ADR-015). Never scales up.
@@ -115,12 +114,4 @@ public class ImageService {
         return new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(), image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt());
     }
 
-    public List<ImageResponse> toResponse(final List<Image> images) {
-        List<ImageResponse> imageResponses = new ArrayList<>();
-        for (Image image : images) {
-            imageResponses.add(new ImageResponse(image.getId(), image.getItem().getId(), "/api/images/" + image.getId(), image.getOriginalFilename(),
-                image.getContentType(), image.getFileSizeBytes(), image.getCreatedAt()));
-        }
-        return imageResponses;
-    }
 }

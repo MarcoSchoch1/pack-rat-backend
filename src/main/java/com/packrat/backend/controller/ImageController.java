@@ -34,6 +34,6 @@ public class ImageController {
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getImage(@AuthenticationPrincipal final UUID userId, @PathVariable final UUID id) {
         final Image image = imageService.getImage(id, userId);
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.parseMediaType(image.getContentType())).body(image.getData());
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getContentType())).body(image.getData());
     }
 }

@@ -10,6 +10,8 @@ import com.packrat.backend.dto.LoginRequest;
 import com.packrat.backend.dto.LoginResponse;
 import com.packrat.backend.service.AuthenticationService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth/login")
 public class AuthenticationController {
@@ -21,7 +23,7 @@ public class AuthenticationController {
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponse> login(@RequestBody final LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid final LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
     

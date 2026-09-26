@@ -1,7 +1,6 @@
 package com.packrat.backend.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +45,7 @@ public class ItemService {
     public List<ItemResponse> getItemsOfCollection(final UUID collectionId, final UUID userId) {
         final Collection collection = collectionService.requireOwnedCollection(collectionId, userId);
         final List<Item> items = itemRepository.findByCollectionId(collection.getId());
-        return toResponse(items);
+        return items.stream().map(this::toResponse).toList();
     }
 
     public Item fillItem(final Item item, final Collection collection, final ItemRequest itemRequest) {
@@ -94,12 +93,4 @@ public class ItemService {
                 item.getCurrency(), item.getDateAcquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
     }
 
-    public List<ItemResponse> toResponse(final List<Item> items) {
-        List<ItemResponse> itemResponses = new ArrayList<>();
-        for (Item item : items) {
-            itemResponses.add(new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
-                item.getCurrency(), item.getDateAcquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt()));
-        }
-        return itemResponses;
-    }
 }

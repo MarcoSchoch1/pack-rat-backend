@@ -32,6 +32,7 @@ import com.packrat.backend.service.CollectionService;
 import com.packrat.backend.service.ItemService;
 import com.packrat.backend.service.JwtService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 
 @WebMvcTest(CollectionController.class)
@@ -69,6 +70,15 @@ class CollectionControllerTest {
     void requestWithoutTokenIs401() throws Exception {
         mockMvc.perform(get("/api/collections"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void invalidOrExpiredTokenIs401() throws Exception {
+        when(jwtService.parseJwt("expired-token")).thenThrow(new ExpiredJwtException(null, null, "expired"));
+
+        mockMvc.perform(get("/api/collections").header("Authorization", "Bearer expired-token"))
+                .andExpect(status().isUnauthorized());
+        verify(collectionService, never()).getCollectionsByUserId(any());
     }
 
     @Test
