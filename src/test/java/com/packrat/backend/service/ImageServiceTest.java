@@ -114,11 +114,19 @@ class ImageServiceTest {
     }
 
     @Test
-    void getImageHidesOtherUsersImages() {
+    void getImageReturnsTheImageById() {
         final Image image = ownedImage();
         when(imageRepository.findById(image.getId())).thenReturn(Optional.of(image));
 
-        assertThrows(ImageNotFoundException.class, () -> imageService.getImage(image.getId(), otherUserId));
+        assertEquals(image, imageService.getImage(image.getId()));
+    }
+
+    @Test
+    void getImageThrowsForUnknownId() {
+        final UUID unknownId = UUID.randomUUID();
+        when(imageRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class, () -> imageService.getImage(unknownId));
     }
 
     @Test

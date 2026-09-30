@@ -1,7 +1,9 @@
 package com.packrat.backend.controller;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +34,10 @@ public class ImageController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> getImage(@AuthenticationPrincipal final UUID userId, @PathVariable final UUID id) {
-        final Image image = imageService.getImage(id, userId);
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getContentType())).body(image.getData());
+    public ResponseEntity<byte[]> getImage(@PathVariable final UUID id) {
+        final Image image = imageService.getImage(id);
+        // An image never changes under its id (a new upload gets a new id), so browsers can keep it forever.
+        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable())
+                .contentType(MediaType.parseMediaType(image.getContentType())).body(image.getData());
     }
 }

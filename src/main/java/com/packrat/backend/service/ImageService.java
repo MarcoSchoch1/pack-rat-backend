@@ -33,8 +33,9 @@ public class ImageService {
         this.itemService = itemService;
     }
 
-    public Image getImage(final UUID imageId, final UUID userId) {
-        return fetchImageAndCheckOwnership(userId, imageId);
+    /** No ownership check: images are served publicly by their unguessable id (ADR-018). */
+    public Image getImage(final UUID imageId) {
+        return imageRepository.findById(imageId).orElseThrow(() -> new ImageNotFoundException(imageId));
     }
 
     public ImageResponse createImage(final UUID itemId, final UUID userId, final MultipartFile file) {
