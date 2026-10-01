@@ -9,4 +9,5 @@ import com.packrat.backend.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, UUID>{
     List<Image> findByItemId(UUID id);
+    long countByItemId(UUID itemId);
 }

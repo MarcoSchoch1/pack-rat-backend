@@ -24,6 +24,7 @@ import com.packrat.backend.repository.ImageRepository;
 public class ImageService {
 
     private static final int MAX_IMAGE_EDGE_PX = 500;
+    private static final int MAX_IMAGES_PER_ITEM = 4;
 
     private final ImageRepository imageRepository;
     private final ItemService itemService;
@@ -40,6 +41,9 @@ public class ImageService {
 
     public ImageResponse createImage(final UUID itemId, final UUID userId, final MultipartFile file) {
         final Item item = itemService.fetchItemAndCheckOwnership(userId, itemId);
+        if (imageRepository.countByItemId(itemId) >= MAX_IMAGES_PER_ITEM) {
+            throw new IllegalArgumentException("An item can have at most " + MAX_IMAGES_PER_ITEM + " images");
+        }
         final byte[] resizedImageBytes = resizeImage(file);
         final Image savedImage = fillImage(new Image(), item, file, resizedImageBytes);
         return toResponse(savedImage);
