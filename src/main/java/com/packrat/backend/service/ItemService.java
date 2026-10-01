@@ -54,6 +54,9 @@ public class ItemService {
         if (itemRequest.name() != null) {
             item.setName(itemRequest.name());
         }
+        if (itemRequest.selfPulled() != null) {
+            item.setSelfPulled(itemRequest.selfPulled());
+        }
         if (itemRequest.pricePaid() != null) {
             item.setPricePaid(itemRequest.pricePaid());
         }
@@ -89,7 +92,7 @@ public class ItemService {
     }
 
     public ItemResponse toResponse(final Item item) {
-        return new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.getPricePaid(), item.getPriceNow(),
+        return new ItemResponse(item.getId(), item.getCollection().getId(), item.getName(), item.isSelfPulled(), item.getPricePaid(), item.getPriceNow(),
                 item.getCurrency(), item.getDateAcquired(), item.getCondition(), item.getMarketPlaceLink(), item.getCreatedAt(), item.getUpdatedAt());
     }
 

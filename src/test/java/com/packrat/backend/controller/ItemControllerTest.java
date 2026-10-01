@@ -71,7 +71,7 @@ class ItemControllerTest {
     }
 
     private ItemResponse itemResponse(final String name) {
-        return new ItemResponse(itemId, UUID.randomUUID(), name, BigDecimal.TEN, null, null, null, null, null, null, null);
+        return new ItemResponse(itemId, UUID.randomUUID(), name, false, BigDecimal.TEN, null, null, null, null, null, null, null);
     }
 
     @Test
@@ -99,7 +99,7 @@ class ItemControllerTest {
 
         mockMvc.perform(json(patch("/api/items/" + itemId), "{\"name\":\"Charizard\"}"))
                 .andExpect(status().isOk());
-        verify(itemService).updateItem(userId, itemId, new ItemRequest("Charizard", null, null, null, null, null, null));
+        verify(itemService).updateItem(userId, itemId, new ItemRequest("Charizard", null, null, null, null, null, null, null));
     }
 
     @Test
