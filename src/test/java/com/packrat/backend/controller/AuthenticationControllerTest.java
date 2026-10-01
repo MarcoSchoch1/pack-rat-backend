@@ -4,7 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,7 +27,7 @@ import com.packrat.backend.security.SecurityConfig;
 import com.packrat.backend.service.AuthenticationService;
 import com.packrat.backend.service.JwtService;
 
-@WebMvcTest(AuthenticationController.class)
+@WebMvcTest(value = AuthenticationController.class, properties = "app.cors.allowed-origins=http://localhost:4200")
 @Import({ SecurityConfig.class, JwtAuthenticationEntryPoint.class })
 class AuthenticationControllerTest {
 
@@ -71,5 +73,22 @@ class AuthenticationControllerTest {
         mockMvc.perform(login("{\"username\":\"  \",\"password\":\"secret\"}"))
                 .andExpect(status().isBadRequest());
         verify(authenticationService, never()).login(any());
+    }
+
+    @Test
+    void corsPreflightFromAllowedOriginPasses() throws Exception {
+        mockMvc.perform(options("/api/auth/login")
+                .header("Origin", "http://localhost:4200")
+                .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:4200"));
+    }
+
+    @Test
+    void corsPreflightFromUnknownOriginIsRejected() throws Exception {
+        mockMvc.perform(options("/api/auth/login")
+                .header("Origin", "http://evil.example")
+                .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isForbidden());
     }
 }

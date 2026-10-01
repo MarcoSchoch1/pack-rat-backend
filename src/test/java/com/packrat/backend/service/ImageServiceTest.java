@@ -43,6 +43,8 @@ class ImageServiceTest {
     @InjectMocks
     private ImageService imageService;
 
+    private static final int MAX_IMAGES_PER_ITEM = 4;
+
     private final UUID ownerId = UUID.randomUUID();
     private final UUID otherUserId = UUID.randomUUID();
 
@@ -114,11 +116,19 @@ class ImageServiceTest {
     }
 
     @Test
-    void getImageHidesOtherUsersImages() {
+    void getImageReturnsTheImageById() {
         final Image image = ownedImage();
         when(imageRepository.findById(image.getId())).thenReturn(Optional.of(image));
 
-        assertThrows(ImageNotFoundException.class, () -> imageService.getImage(image.getId(), otherUserId));
+        assertEquals(image, imageService.getImage(image.getId()));
+    }
+
+    @Test
+    void getImageThrowsForUnknownId() {
+        final UUID unknownId = UUID.randomUUID();
+        when(imageRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+        assertThrows(ImageNotFoundException.class, () -> imageService.getImage(unknownId));
     }
 
     @Test
@@ -138,5 +148,17 @@ class ImageServiceTest {
 
         assertThrows(ImageNotFoundException.class, () -> imageService.deleteImage(image.getId(), otherUserId));
         verify(imageRepository, never()).delete(any());
+    }
+
+    @Test 
+    void itemNeverHasMoreThanFourImages() throws IOException {
+        final Item item = ownedItem();
+        final MockMultipartFile file = image(10, 10, "png");
+        when(itemService.fetchItemAndCheckOwnership(ownerId, item.getId())).thenReturn(item);
+        when(imageRepository.countByItemId(item.getId())).thenReturn(4L);
+
+        assertEquals("An item can have at most " + MAX_IMAGES_PER_ITEM + " images",
+                assertThrows(IllegalArgumentException.class, () -> imageService.createImage(item.getId(), ownerId, file)).getMessage());
+        verify(imageRepository, never()).save(any());
     }
 }

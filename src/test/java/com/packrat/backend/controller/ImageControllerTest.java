@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
@@ -56,32 +57,33 @@ class ImageControllerTest {
     }
 
     @Test
-    void imagesAreNotPublic() throws Exception {
-        mockMvc.perform(get("/api/images/" + imageId))
-                .andExpect(status().isUnauthorized());
-        verify(imageService, never()).getImage(any(), any());
-    }
-
-    @Test
-    void getImageReturnsTheBytesWithTheStoredContentType() throws Exception {
+    void getImageIsPublicAndReturnsTheBytesWithTheStoredContentType() throws Exception {
         final byte[] data = { 1, 2, 3 };
         final Image image = new Image();
         image.setData(data);
         image.setContentType("image/png");
-        when(imageService.getImage(imageId, userId)).thenReturn(image);
+        when(imageService.getImage(imageId)).thenReturn(image);
 
-        mockMvc.perform(authenticated(get("/api/images/" + imageId)))
+        mockMvc.perform(get("/api/images/" + imageId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("image/png"))
+                .andExpect(header().string("Cache-Control", "max-age=31536000, public, immutable"))
                 .andExpect(content().bytes(data));
     }
 
     @Test
-    void otherUsersImageIs404() throws Exception {
-        when(imageService.getImage(imageId, userId)).thenThrow(new ImageNotFoundException(imageId));
+    void unknownImageIs404() throws Exception {
+        when(imageService.getImage(imageId)).thenThrow(new ImageNotFoundException(imageId));
 
-        mockMvc.perform(authenticated(get("/api/images/" + imageId)))
+        mockMvc.perform(get("/api/images/" + imageId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletingImagesStillNeedsLogin() throws Exception {
+        mockMvc.perform(delete("/api/images/" + imageId))
+                .andExpect(status().isUnauthorized());
+        verify(imageService, never()).deleteImage(any(), any());
     }
 
     @Test

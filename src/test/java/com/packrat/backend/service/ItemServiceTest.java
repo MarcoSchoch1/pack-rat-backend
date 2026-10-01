@@ -58,7 +58,7 @@ class ItemServiceTest {
         item.setName("Charizard");
         item.setPricePaid(new BigDecimal("100"));
 
-        itemService.fillItem(item, item.getCollection(), new ItemRequest(null, new BigDecimal("80"), null, null, null, null, null));
+        itemService.fillItem(item, item.getCollection(), new ItemRequest(null, new BigDecimal("80"), null, null, null, null, null, null));
 
         assertEquals("Charizard", item.getName());
         assertEquals(new BigDecimal("80"), item.getPricePaid());
@@ -95,7 +95,7 @@ class ItemServiceTest {
         when(collectionService.requireOwnedCollection(collectionId, otherUserId)).thenThrow(new CollectionNotFoundException(collectionId));
 
         assertThrows(CollectionNotFoundException.class,
-                () -> itemService.addItem(collectionId, otherUserId, new ItemRequest("Pikachu", BigDecimal.TEN, null, "CHF", "2026-01-01", "MINT", null)));
+                () -> itemService.addItem(collectionId, otherUserId, new ItemRequest("Pikachu", BigDecimal.TEN, null, null,  "CHF", "2026-01-01", "MINT", null)));
         verify(itemRepository, never()).save(any());
     }
 }

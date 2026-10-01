@@ -33,6 +33,7 @@ public class Item {
     @ManyToOne @JoinColumn(name = "collection_id")
     private Collection collection;
     private String name;
+    private boolean selfPulled;
     @Column(nullable = false)
     private BigDecimal pricePaid;
     @Nullable  
