@@ -3,3 +3,4 @@ spring.datasource.username=myuser
 spring.datasource.password=changeme
 jwt.secret=changeme-base64-encoded-256-bit-secret
 app.cors.allowed-origins=http://localhost:4200
+app.frontend-url=https://localhost:4200
