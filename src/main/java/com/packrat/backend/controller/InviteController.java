@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,6 +22,12 @@ public class InviteController {
     
     public InviteController(final InviteService inviteService) {
         this.inviteService = inviteService;
+    }
+
+    @GetMapping("/{token}")
+    public ResponseEntity<Void> checkInvite(@PathVariable final UUID token) {
+        inviteService.checkInvite(token);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping

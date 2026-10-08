@@ -20,7 +20,7 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler({CollectionNotFoundException.class, ItemNotFoundException.class, ImageNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({CollectionNotFoundException.class, ItemNotFoundException.class, ImageNotFoundException.class, UserNotFoundException.class, InviteNotFoundException.class})
     public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
