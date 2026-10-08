@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.packrat.backend.dto.LoginRequest;
 import com.packrat.backend.dto.LoginResponse;
+import com.packrat.backend.dto.RegisterRequest;
 import com.packrat.backend.service.AuthenticationService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/auth/login")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authService;
@@ -22,9 +23,15 @@ public class AuthenticationController {
         this.authService = authService;
     }
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid final LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@RequestBody @Valid final RegisterRequest registerRequest) {
+        authService.register(registerRequest);
+        return ResponseEntity.noContent().build();
     }
     
 }

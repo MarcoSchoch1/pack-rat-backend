@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.packrat.backend.dto.LoginRequest;
 import com.packrat.backend.dto.LoginResponse;
+import com.packrat.backend.dto.RegisterRequest;
 import com.packrat.backend.entity.User;
 import com.packrat.backend.repository.UserRepository;
 
@@ -29,6 +30,14 @@ public class AuthenticationService {
         } else {
             throw new BadCredentialsException("Bad Credentials");
         }
+    }
+
+    public void register(final RegisterRequest registerRequest) {
+        /* 
+        check token
+        create user
+        update invite
+        on error: roll back and throw 404 */
     }
 
     public LoginResponse toResponse(final String jwt) {
