@@ -33,7 +33,7 @@ public class SecurityConfig {
             .cors(cors -> {})
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 // ADR-018: <img src> cannot send the JWT, so image bytes are public; the UUID is the secret.
                 .requestMatchers(HttpMethod.GET, "/api/images/*").permitAll()
                 .anyRequest().authenticated())

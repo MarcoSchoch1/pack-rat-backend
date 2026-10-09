@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.packrat.backend.dto.InviteResponse;
@@ -15,12 +16,13 @@ import com.packrat.backend.exception.UserNotFoundException;
 import com.packrat.backend.repository.InviteRepository;
 import com.packrat.backend.repository.UserRepository;
 
+@Service 
 public class InviteService {
 
     private final String frontendUrl;
 
-    private InviteRepository inviteRepository;
-    private UserRepository userRepository;
+    private final InviteRepository inviteRepository;
+    private final UserRepository userRepository;
 
     public InviteService(final InviteRepository inviteRepository, final UserRepository userRepository, @Value("${app.frontend-url}") final String frontendUrl) {
         this.inviteRepository = inviteRepository;
@@ -29,8 +31,8 @@ public class InviteService {
     }
 
     public void checkInvite(final UUID token) {
-        final Invite invite = inviteRepository.findById(token).orElseThrow(() -> new ItemNotFoundException(token));
-        if (!invite.getValidUntil().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null && invite.getUsedBy() != null)) {
+        final Invite invite = inviteRepository.findById(token).orElseThrow(() -> new InviteNotFoundException(token));
+        if (invite.getValidUntil().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null && invite.getUsedBy() != null)) {
             throw new InviteNotFoundException(token);
         }
     }
