@@ -30,5 +30,5 @@ public class Invite {
     @ManyToOne @JoinColumn(name = "used_by_id")
     private User usedBy;
     private LocalDateTime usedAt;
-    private LocalDateTime validUntil;
+    private LocalDateTime expiresAt;
 }

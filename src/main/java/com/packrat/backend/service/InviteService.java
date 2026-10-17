@@ -31,7 +31,7 @@ public class InviteService {
 
     public void checkInvite(final UUID token) {
         final Invite invite = inviteRepository.findById(token).orElseThrow(() -> new InviteNotFoundException(token));
-        if (invite.getValidUntil().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null || invite.getUsedBy() != null)) {
+        if (invite.getExpiresAt().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null || invite.getUsedBy() != null)) {
             throw new InviteNotFoundException(token);
         }
     }
@@ -41,9 +41,9 @@ public class InviteService {
         final Invite invite = new Invite();
         invite.setCreatedBy(user);
         invite.setCreatedAt(LocalDateTime.now());
-        invite.setValidUntil(LocalDateTime.now().plusDays(7));
+        invite.setExpiresAt(LocalDateTime.now().plusDays(7));
         inviteRepository.save(invite);
-        return toResponse(createUrl(invite), invite.getValidUntil());
+        return toResponse(createUrl(invite), invite.getExpiresAt());
     }
 
     private String createUrl(final Invite invite) {

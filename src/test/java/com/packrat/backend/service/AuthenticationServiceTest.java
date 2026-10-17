@@ -104,7 +104,7 @@ class AuthenticationServiceTest {
         final Invite invite = new Invite();
         invite.setId(UUID.randomUUID());
         invite.setCreatedBy(dev);
-        invite.setValidUntil(validUntil);
+        invite.setExpiresAt(validUntil);
         when(inviteRepository.findById(invite.getId())).thenReturn(Optional.of(invite));
         return invite;
     }
