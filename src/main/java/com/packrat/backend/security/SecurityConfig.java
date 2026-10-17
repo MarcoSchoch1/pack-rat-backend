@@ -33,9 +33,10 @@ public class SecurityConfig {
             .cors(cors -> {})
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 // ADR-018: <img src> cannot send the JWT, so image bytes are public; the UUID is the secret.
-                .requestMatchers(HttpMethod.GET, "/api/images/*").permitAll()
+                // ADR-021: checkInvites needs to be public to see if a invite is valid
+                .requestMatchers(HttpMethod.GET, "/api/images/*", "/api/invites/*").permitAll()
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

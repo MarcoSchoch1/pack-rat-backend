@@ -20,11 +20,16 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler({CollectionNotFoundException.class, ItemNotFoundException.class, ImageNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({CollectionNotFoundException.class, ItemNotFoundException.class, ImageNotFoundException.class, UserNotFoundException.class, InviteNotFoundException.class})
     public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
-
+    
+    @ExceptionHandler({UsernameDuplicateException.class})
+    public ResponseEntity<Map<String, String>> handleDuplicate(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+    }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldError().getDefaultMessage();
@@ -35,4 +40,5 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> handleBadValue(RuntimeException ex) {
         return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
     }
+
 }
