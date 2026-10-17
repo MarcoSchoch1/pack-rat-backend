@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * InviteResponse
  */
-public record InviteResponse(String url, LocalDateTime validUnitl) {
+public record InviteResponse(String url, LocalDateTime expiresAt) {
 
 }
 
