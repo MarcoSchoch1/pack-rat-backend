@@ -3,7 +3,8 @@ package com.packrat.backend.dto;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record RegisterRequest(@NotBlank UUID token, @NotBlank String username,  @NotBlank String password) {
+public record RegisterRequest(@NotNull UUID inviteToken, @NotBlank String username,  @NotBlank String password) {
     
 }

@@ -11,7 +11,6 @@ import com.packrat.backend.dto.InviteResponse;
 import com.packrat.backend.entity.Invite;
 import com.packrat.backend.entity.User;
 import com.packrat.backend.exception.InviteNotFoundException;
-import com.packrat.backend.exception.ItemNotFoundException;
 import com.packrat.backend.exception.UserNotFoundException;
 import com.packrat.backend.repository.InviteRepository;
 import com.packrat.backend.repository.UserRepository;
@@ -32,7 +31,7 @@ public class InviteService {
 
     public void checkInvite(final UUID token) {
         final Invite invite = inviteRepository.findById(token).orElseThrow(() -> new InviteNotFoundException(token));
-        if (invite.getValidUntil().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null && invite.getUsedBy() != null)) {
+        if (invite.getValidUntil().isBefore(LocalDateTime.now()) || (invite.getUsedAt() != null || invite.getUsedBy() != null)) {
             throw new InviteNotFoundException(token);
         }
     }
