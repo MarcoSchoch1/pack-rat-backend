@@ -5,6 +5,6 @@ import java.util.UUID;
 
 import jakarta.annotation.Nullable;
 
-public record CollectionResponse(UUID id, UUID userId, String name, @Nullable BigDecimal totalPricePaid,@Nullable BigDecimal totalPriceNow) {
+public record CollectionResponse(UUID id, UUID userId, String name, @Nullable Long itemCount, @Nullable BigDecimal totalPricePaid, @Nullable BigDecimal totalPriceNow) {
     
 }

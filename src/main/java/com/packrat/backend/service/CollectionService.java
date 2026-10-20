@@ -32,7 +32,7 @@ public class CollectionService {
     }
 
     public List<CollectionResponse> getCollectionsByUserId(final UUID userId) {
-        return collectionRepository.findCollectionsByUserId(userId).stream().map((collection) -> toResponse(collection, null, null)).toList();
+        return collectionRepository.findCollectionsWithTotalsByUserId(userId);
     }
 
     public CollectionResponse getCollection(final UUID collectionId, final UUID userId) {
@@ -78,7 +78,7 @@ public class CollectionService {
     }
 
     public CollectionResponse toResponse(final Collection collection, final BigDecimal totalPricePaid, final BigDecimal totalPriceNow) {
-        return new CollectionResponse(collection.getId(), collection.getUser().getId(), collection.getName(), totalPricePaid, totalPriceNow);
+        return new CollectionResponse(collection.getId(), collection.getUser().getId(), collection.getName(), null, totalPricePaid, totalPriceNow);
     }
 
 }

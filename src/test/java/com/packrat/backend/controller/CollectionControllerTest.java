@@ -84,7 +84,7 @@ class CollectionControllerTest {
     @Test
     void createCollectionReturns201ForTheUserInTheToken() throws Exception {
         when(collectionService.addCollection(userId, new CollectionRequest("Pokemon")))
-                .thenReturn(new CollectionResponse(collectionId, userId, "Pokemon", null, null));
+                .thenReturn(new CollectionResponse(collectionId, userId, "Pokemon", null, null, null));
 
         mockMvc.perform(json(post("/api/collections"), "{\"name\":\"Pokemon\"}"))
                 .andExpect(status().isCreated())

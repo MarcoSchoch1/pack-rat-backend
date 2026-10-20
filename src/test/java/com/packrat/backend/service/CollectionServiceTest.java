@@ -69,10 +69,13 @@ class CollectionServiceTest {
     }
 
     @Test
-    void getCollectionsReturnsAllOfTheUsersCollections() {
-        when(collectionRepository.findCollectionsByUserId(ownerId)).thenReturn(List.of(ownedCollection("Pokemon"), ownedCollection("Lego")));
+    void getCollectionsReturnsTheUsersCollectionsWithTotals() {
+        final List<CollectionResponse> collections = List.of(
+                new CollectionResponse(UUID.randomUUID(), ownerId, "Lego", 0L, BigDecimal.ZERO, null),
+                new CollectionResponse(UUID.randomUUID(), ownerId, "Pokemon", 2L, new BigDecimal("150"), new BigDecimal("150")));
+        when(collectionRepository.findCollectionsWithTotalsByUserId(ownerId)).thenReturn(collections);
 
-        assertEquals(2, collectionService.getCollectionsByUserId(ownerId).size());
+        assertEquals(collections, collectionService.getCollectionsByUserId(ownerId));
     }
 
     @Test
