@@ -1,5 +1,7 @@
 package com.packrat.backend.dto;
 
-public record LoginResponse(String jwtAccessToken) {
+import java.time.Instant;
+
+public record LoginResponse(Instant expiresAt) {
     
 }

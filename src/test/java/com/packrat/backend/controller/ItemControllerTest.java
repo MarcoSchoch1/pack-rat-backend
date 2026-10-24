@@ -32,12 +32,14 @@ import com.packrat.backend.dto.ItemRequest;
 import com.packrat.backend.dto.ItemResponse;
 import com.packrat.backend.exception.ItemNotFoundException;
 import com.packrat.backend.security.JwtAuthenticationEntryPoint;
+import com.packrat.backend.security.JwtAuthenticationFilter;
 import com.packrat.backend.security.SecurityConfig;
 import com.packrat.backend.service.ImageService;
 import com.packrat.backend.service.ItemService;
 import com.packrat.backend.service.JwtService;
 
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 
 @WebMvcTest(ItemController.class)
 @Import({ SecurityConfig.class, JwtAuthenticationEntryPoint.class })
@@ -63,7 +65,7 @@ class ItemControllerTest {
     }
 
     private MockHttpServletRequestBuilder authenticated(final MockHttpServletRequestBuilder request) {
-        return request.header("Authorization", "Bearer " + TOKEN);
+        return request.cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, TOKEN));
     }
 
     private MockHttpServletRequestBuilder json(final MockHttpServletRequestBuilder request, final String body) {
@@ -142,7 +144,7 @@ class ItemControllerTest {
         when(imageService.createImage(eq(itemId), eq(userId), any()))
                 .thenReturn(new ImageResponse(imageId, itemId, "/api/images/" + imageId, "card.png", "image/png", 3, null));
 
-        mockMvc.perform(multipart("/api/items/" + itemId + "/images").file(file).header("Authorization", "Bearer " + TOKEN))
+        mockMvc.perform(multipart("/api/items/" + itemId + "/images").file(file).cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, TOKEN)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(imageId.toString()));
     }
@@ -153,7 +155,7 @@ class ItemControllerTest {
         when(imageService.createImage(eq(itemId), eq(userId), any()))
                 .thenThrow(new IllegalArgumentException("Only PNG and JPEG images are supported"));
 
-        mockMvc.perform(multipart("/api/items/" + itemId + "/images").file(file).header("Authorization", "Bearer " + TOKEN))
+        mockMvc.perform(multipart("/api/items/" + itemId + "/images").file(file).cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, TOKEN)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Only PNG and JPEG images are supported"));
     }

@@ -27,6 +27,7 @@ import com.packrat.backend.dto.CollectionRequest;
 import com.packrat.backend.dto.CollectionResponse;
 import com.packrat.backend.exception.CollectionNotFoundException;
 import com.packrat.backend.security.JwtAuthenticationEntryPoint;
+import com.packrat.backend.security.JwtAuthenticationFilter;
 import com.packrat.backend.security.SecurityConfig;
 import com.packrat.backend.service.CollectionService;
 import com.packrat.backend.service.ItemService;
@@ -34,6 +35,8 @@ import com.packrat.backend.service.JwtService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.Cookie;
 
 @WebMvcTest(CollectionController.class)
 @Import({ SecurityConfig.class, JwtAuthenticationEntryPoint.class })
@@ -59,7 +62,7 @@ class CollectionControllerTest {
     }
 
     private MockHttpServletRequestBuilder authenticated(final MockHttpServletRequestBuilder request) {
-        return request.header("Authorization", "Bearer " + TOKEN);
+        return request.cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, TOKEN));
     }
 
     private MockHttpServletRequestBuilder json(final MockHttpServletRequestBuilder request, final String body) {
@@ -73,12 +76,40 @@ class CollectionControllerTest {
     }
 
     @Test
-    void invalidOrExpiredTokenIs401() throws Exception {
+    void validTokenInTheCookieIsAuthenticated() throws Exception {
+        mockMvc.perform(authenticated(get("/api/collections")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void validTokenInTheAuthorizationHeaderIs401() throws Exception {
+        // ADR-019: the cookie is the only accepted transport
+        mockMvc.perform(get("/api/collections").header("Authorization", "Bearer " + TOKEN))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void expiredTokenIs401() throws Exception {
         when(jwtService.parseJwt("expired-token")).thenThrow(new ExpiredJwtException(null, null, "expired"));
 
-        mockMvc.perform(get("/api/collections").header("Authorization", "Bearer expired-token"))
+        mockMvc.perform(get("/api/collections").cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, "expired-token")))
                 .andExpect(status().isUnauthorized());
         verify(collectionService, never()).getCollectionsByUserId(any());
+    }
+
+    @Test
+    void tamperedTokenIs401() throws Exception {
+        when(jwtService.parseJwt("tampered-token")).thenThrow(new SignatureException("bad signature"));
+
+        mockMvc.perform(get("/api/collections").cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, "tampered-token")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void emptyCookieIs401() throws Exception {
+        // what a browser could still send after logout
+        mockMvc.perform(get("/api/collections").cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, "")))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
