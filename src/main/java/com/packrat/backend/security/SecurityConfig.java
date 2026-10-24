@@ -33,8 +33,8 @@ public class SecurityConfig {
             .cors(cors -> {})
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                // ADR-018: <img src> cannot send the JWT, so image bytes are public; the UUID is the secret.
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout").permitAll()
+                // ADR-018: image bytes are public, the UUID is the secret (ADR-019: could require the cookie now, kept public).
                 // ADR-021: checkInvites needs to be public to see if a invite is valid
                 .requestMatchers(HttpMethod.GET, "/api/images/*", "/api/invites/*").permitAll()
                 .anyRequest().authenticated())
@@ -47,7 +47,9 @@ public class SecurityConfig {
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(List.of("Content-Type"));
+        // ADR-019: the JWT cookie only crosses origins in dev (4200 -> 8080); needs explicit origins, never *
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

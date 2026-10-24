@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.packrat.backend.dto.LoginRequest;
-import com.packrat.backend.dto.LoginResponse;
 import com.packrat.backend.dto.RegisterRequest;
+import com.packrat.backend.dto.Session;
 import com.packrat.backend.entity.Invite;
 import com.packrat.backend.entity.User;
 import com.packrat.backend.exception.InviteNotFoundException;
@@ -34,17 +34,17 @@ public class AuthenticationService {
         this.inviteService = inviteService;
     }
 
-    public LoginResponse login(final LoginRequest loginRequest) {
+    public Session login(final LoginRequest loginRequest) {
         final User user = userRepository.findByUsername(loginRequest.username()).orElseThrow(() -> new BadCredentialsException("Bad Credentials"));
         if (passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
-            return toResponse(jwtService.buildJwt(user));
+            return toSession(jwtService.buildJwt(user));
         } else {
             throw new BadCredentialsException("Bad Credentials");
         }
     }
 
     @Transactional 
-    public LoginResponse register(final RegisterRequest registerRequest) {
+    public Session register(final RegisterRequest registerRequest) {
         inviteService.checkInvite(registerRequest.inviteToken());
         final Invite invite = inviteRepository.findById(registerRequest.inviteToken()).orElseThrow(() -> new InviteNotFoundException(registerRequest.inviteToken()));
         if (userRepository.existsByUsername(registerRequest.username())) {
@@ -57,10 +57,10 @@ public class AuthenticationService {
         invite.setUsedAt(LocalDateTime.now());
         invite.setUsedBy(user);
         inviteRepository.save(invite);
-        return toResponse(jwtService.buildJwt(user));
+        return toSession(jwtService.buildJwt(user));
     }
 
-    public LoginResponse toResponse(final String jwt) {
-        return new LoginResponse(jwt);
+    private Session toSession(final String jwt) {
+        return new Session(jwt, jwtService.parseJwt(jwt).getExpiration().toInstant());
     }
 }

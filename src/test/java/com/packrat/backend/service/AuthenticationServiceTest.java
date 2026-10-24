@@ -67,7 +67,7 @@ class AuthenticationServiceTest {
     void correctPasswordReturnsATokenForThatUser() {
         when(userRepository.findByUsername("dev")).thenReturn(Optional.of(dev));
 
-        final String token = authenticationService.login(new LoginRequest("dev", "secret")).jwtAccessToken();
+        final String token = authenticationService.login(new LoginRequest("dev", "secret")).jwt();
 
         assertEquals(dev.getId().toString(), jwtService.parseJwt(token).getSubject());
     }
@@ -120,7 +120,7 @@ class AuthenticationServiceTest {
             return user;
         });
 
-        final String token = authenticationService.register(new RegisterRequest(invite.getId(), "new", "secret")).jwtAccessToken();
+        final String token = authenticationService.register(new RegisterRequest(invite.getId(), "new", "secret")).jwt();
 
         final User created = invite.getUsedBy();
         assertNotNull(created);

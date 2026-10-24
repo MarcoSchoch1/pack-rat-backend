@@ -25,11 +25,13 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.packrat.backend.entity.Image;
 import com.packrat.backend.exception.ImageNotFoundException;
 import com.packrat.backend.security.JwtAuthenticationEntryPoint;
+import com.packrat.backend.security.JwtAuthenticationFilter;
 import com.packrat.backend.security.SecurityConfig;
 import com.packrat.backend.service.ImageService;
 import com.packrat.backend.service.JwtService;
 
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 
 @WebMvcTest(ImageController.class)
 @Import({ SecurityConfig.class, JwtAuthenticationEntryPoint.class })
@@ -53,7 +55,7 @@ class ImageControllerTest {
     }
 
     private MockHttpServletRequestBuilder authenticated(final MockHttpServletRequestBuilder request) {
-        return request.header("Authorization", "Bearer " + TOKEN);
+        return request.cookie(new Cookie(JwtAuthenticationFilter.COOKIE_NAME, TOKEN));
     }
 
     @Test
